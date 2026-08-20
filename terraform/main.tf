@@ -14,3 +14,7 @@ provider "aws" {
 resource "aws_s3_bucket" "portfoliobucket" {
   bucket = "testing-portforlio-south-1"
 }
+
+resource "aws_s3_bucket_website_configuration" "portfoliobucket_web_config" {
+  bucket = aws
+}
