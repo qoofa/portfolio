@@ -16,5 +16,18 @@ resource "aws_s3_bucket" "portfoliobucket" {
 }
 
 resource "aws_s3_bucket_website_configuration" "portfoliobucket_web_config" {
-  bucket = aws
+  bucket = aws_s3_bucket.portfoliobucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
+  }
+}
+
+output "website_endpoint" {
+  description = "website endpoint of s3 web hosting"
+  value       = aws_s3_bucket_website_configuration.portfoliobucket_web_config.website_endpoint
 }
