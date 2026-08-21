@@ -65,3 +65,67 @@ data "aws_iam_policy_document" "allow_public_access" {
     ]
   }
 }
+
+resource "aws_s3_bucket_ownership_controls" "bucket_control" {
+  bucket = aws_s3_bucket.portfoliobucket.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.bucket_control]
+
+  bucket = aws_s3_bucket.portfoliobucket.id
+  acl    = "log-delivery-write"
+}
+
+resource "aws_cloudfront_origin_access_identity" "distribution_identity" {
+  comment = aws_s3_bucket.portfoliobucket.id
+}
+
+resource "aws_cloudfront_distribution" "distribution" {
+  enabled         = true
+  is_ipv6_enabled = false
+  comment         = aws_s3_bucket.portfoliobucket.id
+
+  origin {
+    domain_name = aws_s3_bucket.portfoliobucket.bucket_domain_name
+    origin_id   = aws_s3_bucket.portfoliobucket.id
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.distribution_identity.cloudfront_access_identity_path
+    }
+  }
+
+  default_cache_behavior {
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = aws_s3_bucket.portfoliobucket.id
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  logging_config {
+    include_cookies = false
+    bucket          = aws_s3_bucket.portfoliobucket.bucket_domain_name
+    prefix          = "logs/"
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+}
