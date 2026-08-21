@@ -35,7 +35,7 @@ output "website_endpoint" {
 resource "aws_s3_bucket_public_access_block" "portfoliobucket_public_access_config" {
   bucket = aws_s3_bucket.portfoliobucket.id
 
-  block_public_acls       = false
+  block_public_acls       = true
   block_public_policy     = false
   ignore_public_acls      = false
   restrict_public_buckets = false
@@ -89,9 +89,10 @@ resource "aws_cloudfront_distribution" "distribution" {
   enabled         = true
   is_ipv6_enabled = false
   comment         = aws_s3_bucket.portfoliobucket.id
+  default_root_object = "index.html"
 
   origin {
-    domain_name = aws_s3_bucket.portfoliobucket.bucket_domain_name
+    domain_name = aws_s3_bucket.portfoliobucket.bucket_regional_domain_name
     origin_id   = aws_s3_bucket.portfoliobucket.id
 
     s3_origin_config {
