@@ -6,8 +6,8 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func handler(ctx context.context) {
-	return "Hello world"
+func handler(ctx context.Context) (string, error) {
+	return "Hello world", nil
 }
 
 func main() {
