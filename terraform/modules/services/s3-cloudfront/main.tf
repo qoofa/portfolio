@@ -12,7 +12,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "portfoliobucket" {
-  bucket = "testing-portforlio-south-1"
+  bucket = var.bucket_name
 }
 
 resource "aws_s3_bucket_website_configuration" "portfoliobucket_web_config" {
@@ -25,11 +25,6 @@ resource "aws_s3_bucket_website_configuration" "portfoliobucket_web_config" {
   error_document {
     key = "error.html"
   }
-}
-
-output "website_endpoint" {
-  description = "website endpoint of s3 web hosting"
-  value       = aws_s3_bucket_website_configuration.portfoliobucket_web_config.website_endpoint
 }
 
 resource "aws_s3_bucket_public_access_block" "portfoliobucket_public_access_config" {
@@ -86,9 +81,9 @@ resource "aws_cloudfront_origin_access_identity" "distribution_identity" {
 }
 
 resource "aws_cloudfront_distribution" "distribution" {
-  enabled         = true
-  is_ipv6_enabled = false
-  comment         = aws_s3_bucket.portfoliobucket.id
+  enabled             = true
+  is_ipv6_enabled     = false
+  comment             = aws_s3_bucket.portfoliobucket.id
   default_root_object = "index.html"
 
   origin {
@@ -129,9 +124,4 @@ resource "aws_cloudfront_distribution" "distribution" {
       restriction_type = "none"
     }
   }
-}
-
-output "domain_name" {
-  value       = aws_cloudfront_distribution.distribution.domain_name
-  description = "The domain name of cloudfront"
 }
