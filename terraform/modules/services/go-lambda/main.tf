@@ -44,7 +44,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_policy" "dynamodb_access" {
+resource "aws_iam_policy" "lambda-apigateway-policy" {
   name        = "example_lambda_dynamodb_policy"
   description = "Allows Lambda full CRUD actions on all DynamoDB tables"
 
@@ -52,16 +52,26 @@ resource "aws_iam_policy" "dynamodb_access" {
     Version = "2012-10-17"
     Statement = [
       {
+        Sid = "Stmt1428341300017"
+        
         Effect = "Allow"
         Action = [
+          "dynamodb:DeleteItem",
           "dynamodb:GetItem",
           "dynamodb:PutItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:DeleteItem",
           "dynamodb:Query",
           "dynamodb:Scan",
-          "dynamodb:BatchGetItem",
-          "dynamodb:BatchWriteItem"
+          "dynamodb:UpdateItem"
+        ]
+
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
         ]
 
         Resource = "*"
@@ -72,7 +82,7 @@ resource "aws_iam_policy" "dynamodb_access" {
 
 resource "aws_iam_role_policy_attachment" "lambda_dynamodb_attach" {
   role       = aws_iam_role.example.name
-  policy_arn = aws_iam_policy.dynamodb_access.arn
+  policy_arn = aws_iam_policy.lambda-apigateway-policy.arn
 }
 
 data "aws_ecr_image" "my_image" {
