@@ -53,7 +53,7 @@ resource "aws_iam_policy" "lambda-apigateway-policy" {
     Statement = [
       {
         Sid = "Stmt1428341300017"
-        
+
         Effect = "Allow"
         Action = [
           "dynamodb:DeleteItem",
