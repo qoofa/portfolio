@@ -70,17 +70,21 @@ resource "aws_iam_policy" "dynamodb_access" {
   })
 }
 
-
 resource "aws_iam_role_policy_attachment" "lambda_dynamodb_attach" {
   role       = aws_iam_role.example.name
   policy_arn = aws_iam_policy.dynamodb_access.arn
+}
+
+data "aws_ecr_image" "my_image" {
+  repository_name = aws_ecr_repository.lambda_ecr.name
+  image_tag       = "latest"
 }
 
 resource "aws_lambda_function" "example" {
   function_name = "example_container_function"
   role          = aws_iam_role.example.arn
   package_type  = "Image"
-  image_uri     = "${aws_ecr_repository.lambda_ecr.repository_url}:latest"
+  image_uri     = data.aws_ecr_image.my_image.image_uri
 
   timeout = 30
 }
