@@ -1,7 +1,7 @@
-resource "aws_dynamodb_table" "page_views" {
-  name = "PageViews"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key = "id"
+resource "aws_dynamodb_table" "table" {
+  name         = var.table_name
+  billing_mode = var.billing_mode
+  hash_key     = "id"
 
   attribute {
     name = "id"
@@ -32,11 +32,11 @@ resource "aws_iam_role_policy" "lambda_policy" {
       {
         Effect   = "Allow"
         Action   = ["dynamodb:UpdateItem"]
-        Resource = aws_dynamodb_table.page_views.arn
+        Resource = aws_dynamodb_table.table.arn
       },
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
