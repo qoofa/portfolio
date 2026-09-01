@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -35,7 +36,10 @@ func handler(ctx context.Context) (events.APIGatewayProxyResponse, error) {
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: pageID},
 		},
-		UpdateExpression: aws.String("SET views = if_not_exists(views, :zero) + :inc"),
+		UpdateExpression: aws.String("SET #v = if_not_exists(#v, :zero) + :inc"),
+		ExpressionAttributeNames: map[string]string{
+			"#v": "views",
+		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":inc":  &types.AttributeValueMemberN{Value: "1"},
 			":zero": &types.AttributeValueMemberN{Value: "0"},
@@ -45,6 +49,7 @@ func handler(ctx context.Context) (events.APIGatewayProxyResponse, error) {
 
 	result, err := dbClient.UpdateItem(ctx, input)
 	if err != nil {
+		log.Printf("Error: %v", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
 			Headers: map[string]string{
