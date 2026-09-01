@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "lambda_ecr" {
-  name                 = "go-lambda-ecr-repository"
+  name                 = var.ecr_name
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -9,8 +9,8 @@ resource "aws_ecr_repository" "lambda_ecr" {
   force_delete = true
 }
 
-resource "aws_iam_role" "example" {
-  name = "example_lambda_execution_role"
+resource "aws_iam_role" "lambda_ecr_role" {
+  name = "${var.ecr_name}_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -27,12 +27,12 @@ resource "aws_iam_role" "example" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
-  role       = aws_iam_role.example.name
+  role       = aws_iam_role.lambda_ecr_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_policy" "lambda-apigateway-policy" {
-  name        = "example_lambda_dynamodb_policy"
+resource "aws_iam_policy" "lambda_apigateway_policy" {
+  name        = "${var.ecr_name}_policy"
   description = "Allows Lambda full CRUD actions on all DynamoDB tables"
 
   policy = jsonencode({
@@ -68,8 +68,8 @@ resource "aws_iam_policy" "lambda-apigateway-policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_dynamodb_attach" {
-  role       = aws_iam_role.example.name
-  policy_arn = aws_iam_policy.lambda-apigateway-policy.arn
+  role       = aws_iam_role.lambda_ecr_role.name
+  policy_arn = aws_iam_policy.lambda_apigateway_policy.arn
 }
 
 data "aws_ecr_image" "my_image" {
@@ -78,8 +78,8 @@ data "aws_ecr_image" "my_image" {
 }
 
 resource "aws_lambda_function" "go_lambda" {
-  function_name = "example_container_function"
-  role          = aws_iam_role.example.arn
+  function_name = var.function_name
+  role          = aws_iam_role.lambda_ecr_role.arn
   package_type  = "Image"
   image_uri     = data.aws_ecr_image.my_image.image_uri
 
@@ -87,14 +87,14 @@ resource "aws_lambda_function" "go_lambda" {
 }
 
 resource "aws_apigatewayv2_api" "lambda" {
-  name          = "serverless_lambda_gw"
+  name          = "${var.function_name}_gw"
   protocol_type = "HTTP"
 }
 
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
 
-  name        = "view_count"
+  name        = var.function_name
   auto_deploy = true
 
   access_log_settings {
