@@ -2,11 +2,20 @@ name: Deploy Static Website to S3
 
 on:
   push:
-    branches: [ chore/migrate-s3 ]
+    branches:
+      - chore/migrate-s3
+      - main
+    paths:
+      - 'assets/**' 
+      - 'pages/**'
+      - 'script/**'
+      - 'style/**'
+      - '*.html' 
   workflow_dispatch:
 
 jobs:
   deploy:
+    name: Deploy In S3
     runs-on: ubuntu-latest
     environment: s3-push
 
