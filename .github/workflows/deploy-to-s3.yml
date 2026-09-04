@@ -3,7 +3,6 @@ name: Deploy Static Website to S3
 on:
   push:
     branches:
-      - chore/migrate-s3
       - main
     paths:
       - 'assets/**' 
