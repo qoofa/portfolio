@@ -1,4 +1,7 @@
-output "domain_name" {
-  value       = module.s3-cloudfront.domain_name
-  description = "The domain name of cloudfront"
+output "acm_validation" {
+  value = module.s3-cloudfront.acm_certificate_validation_records
+}
+
+output "cloudfront_url" {
+  value = module.s3-cloudfront.cloudfront_domain_name
 }
